@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <title>MVVM</title>
+</head>
+
+<body>
+    <div id="app">
+        <h2>{{ person.name }} -- {{ person.age }}</h2>
+        <h2>{{ person.fav }}</h2>
+        <h3>{{ msg}}</h3>
+        <div v-text='msg'></div>
+        <div v-text='person.name'></div>
+        <ul>
+            <li>1</li>
+            <li>2</li>
+            <li>3</li>
+        </ul>
+        <div v-html='htmlStr'></div>
+        <input type="text" v-model='msg'>
+        <button v-on:click='handleClick'>a button</button>
+    </div>
+    <script src='./myvue.js'></script>
+    <script>
+        let vm = new Myvue({
+            el: "#app",
+            data() {
+                return {
+                    person: {
+                        name: 'lzhu',
+                        age: 18,
+                        fav: 'code'
+                    },
+                    msg: 'mvvm',
+                    number: 0,
+                    htmlStr: '<div>一个v-html</div>'
+                }
+            },
+            methods: {
+                handleClick() {
+                    this.number++
+                }
+            }
+        })
+    </script>
+
+</body>
+
+</html>
