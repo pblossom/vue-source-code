@@ -11,8 +11,17 @@ const compileUtils = {
     //此时就把msg 和person.name 的值用一个通用的方法取出。
   },
   text(el, expr, vm) {
-    //expr:msg  person.name
-    const value = this.getValue(expr, vm);
+    //expr:msg  person.name {{}}
+    //1.判断是不是插值表达式
+    let value;
+    if (/\{\{(.+?)\}\}/.test(expr)) {
+      //{{}}
+      expr.replace(/\{\{(.+?)\}\}/g, (...match) => {
+        console.log("match: ", match);
+      });
+    } else {
+      value = this.getValue(expr, vm);
+    }
     this.updater.textUpdater(el, value);
   },
   html(el, expr, vm) {
@@ -22,9 +31,12 @@ const compileUtils = {
   },
   model(el, expr, vm) {
     const value = this.getValue(expr, vm);
-    this.updater.moduleUpdater(el, value);
+    this.updater.modelUpdater(el, value);
   },
-  on(el, expr, vm, eventName) {},
+  on(el, expr, vm, eventName) {
+    const value = this.getValue(expr, vm);
+    //const event = vm.$options.method[eventName];
+  },
 
   updater: {
     //虽然可以在解析时直接对el进行操作，但将update操作抽离解耦更方便。
@@ -63,11 +75,9 @@ class Compile {
         //是元素节点，编译元素节点
         //console.log("元素节点", child);
         this.compileElements(child);
-        // let attr = child.attributes;
-        // console.log("attr: ", attr);
       } else {
         //是文本节点，编译文本节点
-        //console.log("其他节点", child);
+        //console.log("文本节点", child);
         this.compileText(child);
       }
       if (child.childNodes && child.childNodes.length) {
@@ -88,11 +98,22 @@ class Compile {
         //console.log("event: ", eventName);
         //console.log("directName: ", directName);
         //定义一个处理的类  接收参数：node? / value / vm /eventName (eventName是可选参数,放在最后)
+        //用这个类去更新数据，完成数据=>视图
         compileUtils[directName](node, value, this.vm, eventName);
+
+        //删除v-指令标签的attributes。
+        node.removeAttribute("v-" + directName);
       }
     });
   }
-  compileText(node) {}
+  compileText(node) {
+    //编译{{}} 这里用正则解析
+    let content = node.textContent;
+    if (/\{\{(.+?)\}\}/.test(content)) {
+      //console.log("node: ", node.textContent);
+      compileUtils.text(node, content, this.vm);
+    }
+  }
 
   isElementNode(node) {
     return node.nodeType === 1;
