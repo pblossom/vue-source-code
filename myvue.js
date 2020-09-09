@@ -15,9 +15,11 @@ const compileUtils = {
     //1.判断是不是插值表达式
     let value;
     if (/\{\{(.+?)\}\}/.test(expr)) {
+      console.log("expr: ", expr);
       //{{}}
-      expr.replace(/\{\{(.+?)\}\}/g, (...match) => {
+      value = expr.replace(/\{\{(.+?)\}\}/g, (...match) => {
         console.log("match: ", match);
+        return this.getValue(match[1].trim(), vm);
       });
     } else {
       value = this.getValue(expr, vm);
@@ -34,8 +36,12 @@ const compileUtils = {
     this.updater.modelUpdater(el, value);
   },
   on(el, expr, vm, eventName) {
-    const value = this.getValue(expr, vm);
-    //const event = vm.$options.method[eventName];
+    //eventName:click
+    const fn = vm.$options.methods && vm.$options.methods[expr]; //通过expr取得回调函数
+    el.addEventListener(eventName, fn.bind(vm), false);
+    //回调函数要把vm作为this绑定进去，如果不绑定，index.html里的this指向的就是compileUtils这个对象
+    //但此处这么做有问题，使用时的this.number可以取得值是因为vue里把data挂载到了vm中
+    //我们自己实现的方法没有这个步骤，所以this.number=undefined
   },
 
   updater: {

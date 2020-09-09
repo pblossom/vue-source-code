@@ -20,6 +20,7 @@
         <div v-html='htmlStr'></div>
         <input type="text" v-model='msg'>
         <button v-on:click='handleClick'>a button</button>
+        <div v-text='number'></div>
     </div>
     <script src='./myvue.js'></script>
     <script>
@@ -39,7 +40,8 @@
             },
             methods: {
                 handleClick() {
-                    this.number++
+                    this.number + '1'
+                    console.log('this.number: ', this);
                 }
             }
         })
