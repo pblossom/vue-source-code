@@ -21,6 +21,9 @@
         <input type="text" v-model='msg'>
         <button v-on:click='handleClick'>a button</button>
         <div v-text='number'></div>
+
+        <button @click='handleClick'>a button</button>
+        <div :number></div>
     </div>
     <script src='./myvue.js'></script>
     <script>
@@ -34,13 +37,13 @@
                         fav: 'code'
                     },
                     msg: 'mvvm',
-                    number: 0,
+                    //number: 0,
                     htmlStr: '<div>一个v-html</div>'
                 }
             },
             methods: {
                 handleClick() {
-                    this.number + '1'
+                    //this.number + '1'
                     console.log('this.number: ', this);
                 }
             }
