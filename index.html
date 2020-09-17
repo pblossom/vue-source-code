@@ -7,8 +7,9 @@
 
 <body>
     <div id="app">
-        <h2>{{ person.name }} -- {{ person.age }}</h2>
-        <h2>{{ person.fav }}</h2>
+        <h2>{{person.name}} -- {{person.age}}</h2>
+        <h2>{{fullName}}</h2>
+        <h2>{{person.fav}}</h2>
         <h3>{{ msg}}</h3>
         <div v-text='msg'></div>
         <div v-text='person.name'></div>
@@ -37,14 +38,19 @@
                         fav: 'code'
                     },
                     msg: 'mvvm',
-                    //number: 0,
+                    number: 0,
                     htmlStr: '<div>一个v-html</div>'
+                }
+            },
+            computed: {
+                fullName() {
+                    return this.person.name + '--' + this.person.age
                 }
             },
             methods: {
                 handleClick() {
-                    //this.number + '1'
-                    console.log('this.number: ', this);
+                    this.$data.number++
+                    console.log('this.number: ', this.number);
                 }
             }
         })

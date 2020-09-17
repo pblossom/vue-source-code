@@ -227,11 +227,11 @@ class Observer {
     Object.defineProperty(data, key, {
       get() {
         //为属性对应的观察者添加订阅,以便在set时发布通知
-        Dep.target && dep.subs.push(Dep.target);
+        // console.log(" Dep.target: ", Dep.target);
+        Dep.target && dep.addSubs(Dep.target);
         return value;
       },
       set: (newValue) => {
-        console.log("set: 111111111");
         this.observer(newValue); //将实例完成后的调用也进行劫持，加上getter和setter
         value = newValue;
         //发布通知
@@ -271,9 +271,9 @@ class Watcher {
     this.vm = vm;
     this.expr = expr;
     this.cb = cb;
-    this.oldVal = this.getVal(expr, vm);
+    this.oldVal = this.getfirstVal(expr, vm);
   }
-  getVal(expr, vm) {
+  getfirstVal(expr, vm) {
     Dep.target = this; //把自己这个观察者传出去到全局的Dep，在下一步get数据的时候会触发Observe的get方法。
     let value = compileUtils.getValue(expr, vm);
     Dep.target = null; //将target重置
@@ -281,8 +281,9 @@ class Watcher {
   }
   //当观察到变化时调用update函数
   update() {
-    let newVal = this.getVal(this.expr, this.vm);
+    let newVal = compileUtils.getValue(this.expr, this.vm);
     if (this.oldVal !== newVal) {
+      this.oldVal = newVal;
       this.cb(newVal);
     }
   }
@@ -293,13 +294,36 @@ class Myvue {
     this.el = options.el;
     this.$data = options.data();
     this.$options = options;
+    let computed = options.computed;
 
     if (this.el) {
       //实现数据劫持，将实例中的data全部转换成`Object.defineProperty()`定义
       new Observer(this.$data);
 
+      //实现computed，实现方法与proxy类似
+      for (let key in computed) {
+        //key是计算属性里的函数名，通过函数名取函数体，绑定到vm上执行
+        Object.defineProperty(this.$data, key, {
+          get: () => {
+            return computed[key].call(this);
+          },
+        });
+      }
+
+      // 把vm上的数据获取操作代理到vm.$data
+      this.proxyVM(this.$data);
+
       //获得el所在的dom节点，下一步进行指令解析。
       new Compile(this.el, this);
+    }
+  }
+  proxyVM(data) {
+    for (let key in data) {
+      Object.defineProperty(this, key, {
+        get() {
+          return data[key];
+        },
+      });
     }
   }
 }
